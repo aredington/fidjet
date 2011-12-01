@@ -2,11 +2,11 @@
 
 Fidjet is dead-simple ad-hoc configuration for pure functions, inspired by suggestions made by Stuart Sierra on this blog post: http://cemerick.com/2011/10/17/a-la-carte-configuration-in-clojure-apis/. If you write a core API where functions accept some config parameter as their first argument, you can then create a parallel namespace where those same functions can be used in a with-config block.
 
-Suppose you had a namespace monotony.core, in it you had a function named periods, which needed a configuration as it's first argument and a keyword as its second. It's definition might look something like this:
+Suppose you had a namespace monotony.core, in it you had a function named periods, which needed a configuration as ites first argument and a keyword as its second. Its definition might look something like this:
 
     (defn periods [config keyword] (some-awesome-functional-logic))
 
-Every time you called this you'd have to pass in config explicitly. Annoying! Further, if you were composing many such functions that all shared the same config, even more annoying! One nice solution would be to clone this API to another namespace that allowed a with-config block. Inside that with-config block we could play our hearts content with that implicit configuration. This is easy, if you'd like to use fidjet it will require about 4 lines of clojure. If your main API resides in monotony.core, make a new file named configured.clj, and write the following:
+Every time you called this you'd have to pass in config explicitly. Annoying! Further, if you were composing many such functions that all shared the same config, even more annoying! One nice solution would be to clone this API to another namespace that allowed a with-config block. Inside that with-config block we could play to our hearts' content with that implicit configuration. This is easy, if you'd like to use fidjet it will require about 4 lines of clojure. If your main API resides in monotony.core, make a new file named configured.clj, and write the following:
 
     (ns monotony.configured
       (:require [monotony.core :as m]
@@ -28,12 +28,12 @@ Picking on monotony again, you can now do the following:
     (require ['monotony.configured :as 'm])
     (m/with-config (m/new-config) (take 3 (m/periods :month)))
 
-This is semantically identical to writing
+This is semantically identical to writing:
 
     (take 3 (m/periods (m/new-config) :month))
 
- but when body starts to get large will save you a lot of typing.
+But when the body starts to get large, will save you a lot of typing.
 
-## It doesn't work right.
+## It doesn't work right?
 
-Sorry! If you can show me how it's breaking I'll try and fix it. If you think you can fix it, fork the repo, describe the problem, add your fix, and send me a pull request. I'll be much more likely to accept your pull request if you also include tests that show how fidjet is broken and how your proposed changes fix it.
+Sorry! If you can show me how it's breaking, I'll try and fix it. If you think you can fix it, fork the repo, describe the problem, add your fix, and send me a pull request. I'll be much more likely to accept your pull request if you also include tests that show how fidjet is broken and how your proposed changes fix it.
