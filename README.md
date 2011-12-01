@@ -4,7 +4,7 @@ Fidjet is dead-simple ad-hoc configuration for pure functions, inspired by sugge
 
 Suppose you had a namespace monotony.core, in it you had a function named periods, which needed a configuration as it's first argument and a keyword as its second. It's definition might look something like this:
 
-    (def periods [config keyword] (some-awesome-functional-logic))
+    (defn periods [config keyword] (some-awesome-functional-logic))
 
 Every time you called this you'd have to pass in config explicitly. Annoying! Further, if you were composing many such functions that all shared the same config, even more annoying! One nice solution would be to clone this API to another namespace that allowed a with-config block. Inside that with-config block we could play our hearts content with that implicit configuration. This is easy, if you'd like to use fidjet it will require about 4 lines of clojure. If your main API resides in monotony.core, make a new file named configured.clj, and write the following:
 
@@ -21,14 +21,14 @@ Fidjet expects two arguments to remap-ns-with-arg: the source namespace (ns) and
 
 * Dig through the source-ns finding all the public functions. It examines their arglists. All of the functions which accept arg-sym as their first argument get rebound in target-ns to throw an exception if they are not in a with-arg-sym block.
 * All of the functions which did not accept arg-sym as their first argument get rebound in target-ns untouched.
-* A new macro is created in target-ns. If your arg-sym is config, it will be called with-config. If your arg-sym is connection, it will be called with-connection. This macro accepts two arguments, the arg you want to share across a body, and the body itself. It rebinds all of the previously imported functions which were made to throw exceptions on call to partial versions usings the shared argument. It then executes body. 
+* A new macro is created in target-ns. If your arg-sym is config, it will be called with-config. If your arg-sym is connection, it will be called with-connection. This macro accepts two arguments, the arg you want to share across a body, and the body itself. It rebinds all of the previously imported functions which were made to throw exceptions on call to partial versions usings the shared argument. It then executes body.
 
 Picking on monotony again, you can now do the following:
 
     (require ['monotony.configured :as 'm])
     (m/with-config (m/new-config) (take 3 (m/periods :month)))
 
-This is semantically identical to writing 
+This is semantically identical to writing
 
     (take 3 (m/periods (m/new-config) :month))
 
