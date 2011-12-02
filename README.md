@@ -2,7 +2,7 @@
 
 Fidjet is dead-simple ad-hoc configuration for pure functions, inspired by suggestions made by Stuart Sierra on this blog post: http://cemerick.com/2011/10/17/a-la-carte-configuration-in-clojure-apis/. If you write a core API where functions accept some config parameter as their first argument, you can then create a parallel namespace where those same functions can be used in a with-config block.
 
-Suppose you had a namespace monotony.core, in it you had a function named periods, which needed a configuration as ites first argument and a keyword as its second. Its definition might look something like this:
+Suppose you had a namespace monotony.core, in it you had a function named periods, which needed a configuration as its first argument and a keyword as its second. Its definition might look something like this:
 
     (defn periods [config keyword] (some-awesome-functional-logic))
 
