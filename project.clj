@@ -1,3 +1,9 @@
 (defproject fidjet "0.0.1"
   :description "One stop happiness for making your configured functions pure."
-  :dependencies [[clojure "1.3.0"]])
+  :dependencies [[org.clojure/clojure "1.5.0"]]
+  :license {:name "MIT"
+            :url "https://raw.github.com/aredington/fidjet/master/LICENSE"
+            :distribution :repo}
+  :url "http://github.com/aredington/fidjet"
+  :profiles {:dev  {:dependencies [[midje "1.5.1"]]
+                    :plugins [[lein-midje "3.1.0"]]}})

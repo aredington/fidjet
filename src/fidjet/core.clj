@@ -8,16 +8,43 @@
   [ns]
   (filter (comp fn? deref second) (ns-publics ns)))
 
+(defn fn-vars-consistent?
+  "Predicate to test `var` for argument consistency against
+  `sym`. Argument consistency is true for `var` if
+
+   - No arities include `sym` as the first arg.
+   - Every arities includes `sym` as the first arg."
+  [var sym]
+  (let [first-args (->> var
+                        meta
+                        :arglists
+                        (map first))]
+    (if (or (every? (partial = sym) first-args)
+            (every? (partial not= sym) first-args))
+      true
+      false)))
+
 (defn fn-sym-vars-with-arg
   "Return the names and vars of all fns that accept arg-sym as their
   first arg in ns"
   [ns arg-sym]
-  (filter
-   ;; Thise absurdly convoluted predicate will dig through ns, and
-   ;; find every fn where every arity receives arg-sym as its first
-   ;; arg.
-   (comp (partial every? #(= arg-sym (first %))) :arglists meta second)
-   (fn-sym-vars ns)))
+  (let [sym-vars (fn-sym-vars ns)
+        inconsistent-sym-vars (remove (comp #(fn-vars-consistent? % arg-sym)
+                                            second)
+                                      sym-vars)]
+    (when-not (empty? inconsistent-sym-vars)
+      (throw (ex-info (str "Inconsistent arities in " ns)
+                             {:inconsistent-arities
+                              (into {} (for [[sym var] inconsistent-sym-vars]
+                                         [sym (-> var
+                                                  meta
+                                                  :arglists)]))})))
+    (filter
+     ;; Thise absurdly convoluted predicate will dig through ns, and
+     ;; find every fn where every arity receives arg-sym as its first
+     ;; arg.
+     (comp (partial every? #(= arg-sym (first %))) :arglists meta second)
+     sym-vars)))
 
 (defn fn-sym-vars-without-arg
   "Return the names and vars of all the fns that don't accept
