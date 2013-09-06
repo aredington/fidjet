@@ -5,7 +5,8 @@
             [fidjet.test.simple-fns-with-config-configured :as c1]
             [fidjet.test.inconsistent-arities-excluding-arg-configured :as c2]
             [fidjet.test.consistent-arities-configured :as c3]
-            [fidjet.test.destructured-first-args-with-name-configured :as c4])
+            [fidjet.test.destructured-first-args-with-name-configured :as c4]
+            [fidjet.test.lazy-seq-configured :as c5])
   (:use [midje.sweet]))
 
 (facts "about `fidjet.test.simple-fns-with-config-configured`"
@@ -64,5 +65,13 @@
                     (c4/with-config {:fn inc}
                       (c4/foo 13)) => 14)))
 
-(facts "about `fidjet.test.lazy-seq-needs-config`")
+(facts "about `fidjet.test.lazy-seq-configured`"
+       (fact "with-config returns lazy-seqs that retain the scope of the with-config block"
+             (let [seq (c5/with-config {:ele :zot}
+                         (c5/foos))
+                   drop-realized (fn [seq]
+                                   (if (realized? seq)
+                                     (recur (rest seq))
+                                     seq))]
+               (first (drop-realized seq))) => :zot))
 
