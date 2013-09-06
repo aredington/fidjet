@@ -1,12 +1,47 @@
 (ns ^{:doc "Fidjet: Making pure fns with configurations less painful."
       :author "Alex Redington"}
   fidjet.core
-  (:require [clojure.set :as s]))
+  (:require [clojure.set :as s])
+  (:import (clojure.lang Symbol IPersistentMap IPersistentVector)))
 
 (defn fn-sym-vars
   "Return the names and vars of all fns defined in ns"
   [ns]
   (filter (comp fn? deref second) (ns-publics ns)))
+
+(defprotocol FnArg
+  (arg-name [arg] "Returns the symbol argument name of arg. If an
+  argument name cannot be determined, throws."))
+
+(extend-protocol FnArg
+  Symbol
+  (arg-name [symbol] symbol)
+  IPersistentMap
+  (arg-name [m]
+   (if (find m :as)
+     (:as m)
+     (throw (ex-info "Anonymous destructured first argument"
+                     {:argument m
+                      :as-m (:as m)
+                      :destructured-as :map}))))
+  IPersistentVector
+  (arg-name [v]
+    (let [length (count v)]
+      (if (= :as (v (- length 2)))
+        (last v)
+        (throw (ex-info "Anonymous destructured first argument"
+                        {:argument v
+                         :destructured-as :seq}))))))
+
+(defn first-arg-syms
+  "Returns the symbols naming the first argument of each arity of the
+  fn stored in `fn-var`"
+  [fn-var]
+  (->> fn-var
+       meta
+       :arglists
+       (map first)
+       (map arg-name)))
 
 (defn fn-vars-consistent?
   "Predicate to test `var` for argument consistency against
@@ -15,14 +50,18 @@
    - No arities include `sym` as the first arg.
    - Every arities includes `sym` as the first arg."
   [var sym]
-  (let [first-args (->> var
-                        meta
-                        :arglists
-                        (map first))]
+  (let [first-args (first-arg-syms var)]
     (if (or (every? (partial = sym) first-args)
             (every? (partial not= sym) first-args))
       true
       false)))
+
+(defn first-arg-named?
+  "Predicate to test if every arity of a namespace mapping has
+  `arg-sym` as a first argument."
+  [arg-sym [fn-sym fn-var :as ns-mapping]]
+  (let [arg-syms (first-arg-syms fn-var)]
+    (every? (partial = arg-sym) arg-syms)))
 
 (defn fn-sym-vars-with-arg
   "Return the names and vars of all fns that accept arg-sym as their
@@ -40,10 +79,7 @@
                                                   meta
                                                   :arglists)]))})))
     (filter
-     ;; Thise absurdly convoluted predicate will dig through ns, and
-     ;; find every fn where every arity receives arg-sym as its first
-     ;; arg.
-     (comp (partial every? #(= arg-sym (first %))) :arglists meta second)
+     (partial first-arg-named? arg-sym)
      sym-vars)))
 
 (defn fn-sym-vars-without-arg

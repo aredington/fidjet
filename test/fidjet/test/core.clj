@@ -51,7 +51,7 @@
        (fact "trying to macroexpand remap-ns-with-arg throws"
              (eval '(f/remap-ns-with-arg fidjet.test.destructured-first-args-without-name config))
              =>
-             (throws clojure.lang.ExceptionInfo #"Anonymous first argument")))
+             (throws clojure.lang.ExceptionInfo #"Anonymous destructured first argument")))
 
 (facts "about `fidjet.test.destructured-first-args-with-name-configured`"
        (facts "the `foo` fn"
