@@ -1,4 +1,4 @@
-(defproject fidjet "0.0.1"
+(defproject fidjet "0.0.2"
   :description "One stop happiness for making your configured functions pure."
   :dependencies [[org.clojure/clojure "1.5.0"]]
   :license {:name "MIT"
