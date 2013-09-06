@@ -8,3 +8,4 @@ build
 ./fidjet
 /target/*
 /.lein-failures
+/pom.xml.asc
